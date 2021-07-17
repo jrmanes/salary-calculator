@@ -1,0 +1,16 @@
+POST http://localhost:8080/api/v1/salary
+Content-Type: application/json
+
+{
+  "yearly_gross_salary": 45000,
+  "payments_per_year": 12,
+  "age": "28",
+  "professional_category": "A",
+  "contract_type": "A",
+  "family_situation": "",
+  "children_exclusive": false,
+  "children_younger_than_25": 0,
+  "children_younger_than_3": 0
+}
+
+###
