@@ -5,7 +5,7 @@ import (
 	"os"
 	"os/signal"
 
-	"github.com/jrmanes/my-salary/pkg/server"
+	"github.com/jrmanes/salary-calculator/pkg/server"
 )
 
 const (

@@ -5,7 +5,7 @@ import (
 
 	"github.com/go-chi/chi"
 
-	"github.com/jrmanes/my-salary/pkg/salary"
+	"github.com/jrmanes/salary-calculator/pkg/salary"
 )
 
 func createRouter() http.Handler {

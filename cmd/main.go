@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	"github.com/jrmanes/my-salary/cmd/bootstrap"
+	"github.com/jrmanes/salary-calculator/cmd/bootstrap"
 )
 
 const (
