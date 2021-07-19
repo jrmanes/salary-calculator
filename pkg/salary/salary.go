@@ -7,25 +7,39 @@ import (
 )
 
 type NetSalary struct {
-	GrossSalaryPerYear  int `json:"gross_salary_per_year"`
+	// GrossSalaryPerYear salary gross per year
+	GrossSalaryPerYear int `json:"gross_salary_per_year"`
+	// GrossSalaryPerMonth salary gross per month
 	GrossSalaryPerMonth int `json:"gross_salary_per_month"`
 
-	NetSalaryPerYear  int `json:"net_salary_per_year"`
+	// NetSalaryPerYear net salary, calculated by year
+	NetSalaryPerYear int `json:"net_salary_per_year"`
+	// NetSalaryPerMonth net salary, calculated by month
 	NetSalaryPerMonth int `json:"net_salary_per_month"`
 
+	// IRPFApplied percentage of IRPF to apply
 	IRPFApplied int `json:"irpf_applied"`
 }
 
 type Salary struct {
-	YearlyGrossSalary     int    `json:"yearly_gross_salary"`
-	PaymentsPerYear       int    `json:"payments_per_year"`
-	Age                   string `json:"age"`
-	ProfessionalCategory  string `json:"professional_category"`
-	ContractType          string `json:"contract_type"`
-	FamilySituation       string `json:"family_situation"`
-	ChildrenExclusive     bool   `json:"children_exclusive"`
-	ChildrenYoungerThan25 int    `json:"children_younger_than_25"`
-	ChildrenYoungerThan3  int    `json:"children_younger_than_3"`
+	// YearlyGrossSalary total salary gross per year
+	YearlyGrossSalary int `json:"yearly_gross_salary"`
+	// PaymentsPerYear number of payments received per year
+	PaymentsPerYear int `json:"payments_per_year"`
+	// Age years of the user
+	Age string `json:"age"`
+	// ProfessionalCategory category in which the user is, can be found in the contract
+	ProfessionalCategory string `json:"professional_category"`
+	// ContractType Type of the contract
+	ContractType string `json:"contract_type"`
+	// FamilySituation
+	FamilySituation string `json:"family_situation"`
+	// ChildrenExclusive is has children
+	ChildrenExclusive bool `json:"children_exclusive"`
+	// ChildrenYoungerThan25 number of children under 25 years
+	ChildrenYoungerThan25 int `json:"children_younger_than_25"`
+	// ChildrenYoungerThan3 number of children under 3 years
+	ChildrenYoungerThan3 int `json:"children_younger_than_3"`
 }
 
 // CalculateSalaryHandler will add a user into the database
@@ -57,7 +71,7 @@ func (s *Salary) CalculateSalaryHandler(w http.ResponseWriter, r *http.Request) 
 // CalculateNetSalary is where we calculate the salary net using other methods
 func (s *Salary) CalculateNetSalary() []byte {
 
-	log.Println("*********************************")
+	log.Println("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -")
 
 	grossSalary := s.YearlyGrossSalary
 	log.Println("salary gross per year", grossSalary)
@@ -87,7 +101,7 @@ func (s *Salary) CalculateNetSalary() []byte {
 	}
 
 	log.Println("netSalary:", n)
-	log.Println("*********************************")
+	log.Println("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -")
 
 	netS, err := json.Marshal(n)
 	if err != nil {
