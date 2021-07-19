@@ -158,6 +158,7 @@ func (s *Salary) RestRangesOfIRPF() float64 {
 	log.Println(".................................")
 
 	if salaryTotal < 12450.0 || salaryTotal > 12450.0 {
+		log.Println("< 12450.0 || salaryTotal > 12450.0")
 		//salary = salaryTotal - (12450.0 * 0.19)
 		currentRange = 12450.0
 		if s.ToFloat() < 12450.0 {
@@ -166,18 +167,22 @@ func (s *Salary) RestRangesOfIRPF() float64 {
 		log.Println("tmpdiscrange", currentRange)
 		currentRange = currentRange * 0.19
 		log.Println("currentRange with discount", currentRange)
+		log.Println("toDiscount before:", toDiscount)
 		toDiscount += currentRange
+		log.Println("toDiscountafter:", toDiscount)
+
 		log.Println("toDiscount", toDiscount)
 
-		log.Println("tmpDisc before:", tmpDisc)
-		tmpDisc += toDiscount
-		log.Println("tmpDisc after:", tmpDisc)
-
-		log.Println("tmpDisc:", tmpDisc)
+		//log.Println("tmpDisc before:", tmpDisc)
+		//tmpDisc += toDiscount
+		//log.Println("tmpDisc after:", tmpDisc)
+		//
+		//log.Println("tmpDisc:", tmpDisc)
 		log.Println("toDiscount:", toDiscount)
 		log.Println(".................................")
 	}
 	if salaryTotal >= 12450.0 {
+		log.Println("12450.0")
 		//salary = salaryTotal - ((20200.0 - 12450.0) * 0.24)
 		//toDiscount += (20200.0 - 12450.0) * 0.24
 		currentRange = 20200.0 - 12450.0
@@ -187,18 +192,22 @@ func (s *Salary) RestRangesOfIRPF() float64 {
 		log.Println("currentRange", currentRange)
 		currentRange = currentRange * 0.24
 		log.Println("currentRange with discount", currentRange)
+		log.Println("toDiscount before:", toDiscount)
 		toDiscount += currentRange
+		log.Println("toDiscountafter:", toDiscount)
+
 		log.Println("toDiscount", toDiscount)
 
-		log.Println("tmpDisc before:", tmpDisc)
-		tmpDisc += toDiscount
-		log.Println("tmpDisc after:", tmpDisc)
-
-		log.Println("tmpDisc:", tmpDisc)
+		//log.Println("tmpDisc before:", tmpDisc)
+		//tmpDisc += toDiscount
+		//log.Println("tmpDisc after:", tmpDisc)
+		//
+		//log.Println("tmpDisc:", tmpDisc)
 		log.Println("toDiscount:", toDiscount)
 		log.Println(".................................")
 	}
 	if salaryTotal >= 20200.0 {
+		log.Println("20200.0")
 		//salary = salaryTotal - ((35200.0 - 20200.0) * 0.30)
 		//toDiscount +=  (35200.0 - 20200.0) * 0.30
 		currentRange = 35200.0 - 20200.0
@@ -208,18 +217,22 @@ func (s *Salary) RestRangesOfIRPF() float64 {
 		log.Println("tmpdiscrange", currentRange)
 		currentRange = currentRange * 0.30
 		log.Println("currentRange with discount", currentRange)
+		log.Println("toDiscount before:", toDiscount)
 		toDiscount += currentRange
+		log.Println("toDiscountafter:", toDiscount)
+
 		log.Println("toDiscount", toDiscount)
 
-		log.Println("tmpDisc before:", tmpDisc)
-		tmpDisc += toDiscount
-		log.Println("tmpDisc after:", tmpDisc)
-
-		log.Println("tmpDisc:", tmpDisc)
+		//log.Println("tmpDisc before:", tmpDisc)
+		//tmpDisc += toDiscount
+		//log.Println("tmpDisc after:", tmpDisc)
+		//
+		//log.Println("tmpDisc:", tmpDisc)
 		log.Println("toDiscount:", toDiscount)
 		log.Println(".................................")
 	}
 	if salaryTotal >= 35200.0 {
+		log.Println("35200.0")
 		//salary = salaryTotal - ((60000.0 - 35200.0) * 0.37)
 		//toDiscount += (60000.0 - 35200.0) * 0.37
 		currentRange = 60000.0 - 35200.0
@@ -229,18 +242,22 @@ func (s *Salary) RestRangesOfIRPF() float64 {
 		log.Println("tmpdiscrange", currentRange)
 		currentRange = currentRange * 0.37
 		log.Println("currentRange with discount", currentRange)
+		log.Println("toDiscount before:", toDiscount)
 		toDiscount += currentRange
+		log.Println("toDiscountafter:", toDiscount)
+
 		log.Println("toDiscount", toDiscount)
 
-		log.Println("tmpDisc before:", tmpDisc)
-		tmpDisc += toDiscount
-		log.Println("tmpDisc after:", tmpDisc)
-
-		log.Println("tmpDisc:", tmpDisc)
+		//log.Println("tmpDisc before:", tmpDisc)
+		//tmpDisc += toDiscount
+		//log.Println("tmpDisc after:", tmpDisc)
+		//
+		//log.Println("tmpDisc:", tmpDisc)
 		log.Println("toDiscount:", toDiscount)
 		log.Println(".................................")
 	}
 	if salaryTotal >= 60000.0 {
+		log.Println("60000.0")
 		salary = salaryTotal - ((300000.0 - 60000.0) * 0.45)
 		toDiscount += float64(s.YearlyGrossSalary) - salary
 		log.Println("tmpDisc before:", tmpDisc)
@@ -252,6 +269,7 @@ func (s *Salary) RestRangesOfIRPF() float64 {
 		log.Println(".................................")
 	}
 	if salaryTotal > 300000.0 {
+		log.Println("300000.0")
 		salary = salaryTotal - (300000.0 * 0.47)
 		toDiscount += float64(s.YearlyGrossSalary) - salary
 		log.Println("tmpDisc before:", tmpDisc)
@@ -263,8 +281,8 @@ func (s *Salary) RestRangesOfIRPF() float64 {
 		log.Println(".................................")
 	}
 
-	log.Println("salary total: ", float64(s.YearlyGrossSalary), " - ", toDiscount, " --> ", (salary - toDiscount),
-		" per month", ((salary - toDiscount) / 12))
+	log.Println("salary total: ", float64(s.YearlyGrossSalary), " - ", toDiscount, " --> ",
+		(salary - toDiscount), " per month", ((salary - toDiscount) / 12))
 	log.Println(".................................")
 
 	salary = s.ToFloat() - toDiscount
@@ -273,7 +291,7 @@ func (s *Salary) RestRangesOfIRPF() float64 {
 	log.Println("toDiscount", toDiscount)
 	log.Println("SALARY:", salary)
 	log.Println("SALARY with discount", s.ToFloat()-toDiscount)
-	log.Println("salary - discount per MONTH:", s.YearlyGrossSalary, "-", "tmpDisc", tmpDisc, "=", ((s.ToFloat() - tmpDisc) / 12))
+	log.Println("salary - discount per MONTH:", s.YearlyGrossSalary, "-", "toDiscount", toDiscount, "=", ((s.ToFloat() - toDiscount) / 12))
 	log.Println("SALARY AFTER DISCOUNTS", salary)
 	log.Println("##############################")
 
