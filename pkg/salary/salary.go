@@ -19,6 +19,10 @@ type NetSalary struct {
 
 	// IRPFApplied percentage of IRPF to apply
 	IRPFApplied int `json:"irpf_applied"`
+	// IRPFRetentionApplied percentage of IRPF retention per year
+	IRPFRetentionAppliedPerYear int `json:"irpf_retention_applied_per_year"`
+	// IRPFRetentionApplied percentage of IRPF retention per year
+	IRPFRetentionAppliedPerMonth int `json:"irpf_retention_applied_per_month"`
 }
 
 type Salary struct {
@@ -53,13 +57,6 @@ func (s *Salary) CalculateSalaryHandler(w http.ResponseWriter, r *http.Request) 
 
 	defer r.Body.Close()
 
-	//j, err := json.Marshal(s)
-	//if err != nil {
-	//	log.Println("err", err)
-	//}
-	//
-	//log.Println("j", j)
-
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 
@@ -93,11 +90,13 @@ func (s *Salary) CalculateNetSalary() []byte {
 
 	// create a new NetSalary struct
 	n := NetSalary{
-		GrossSalaryPerYear:  grossSalary,
-		GrossSalaryPerMonth: grossPerMonth,
-		NetSalaryPerYear:    s.YearlyGrossSalary - s.RestIRPPerYear(),
-		NetSalaryPerMonth:   s.SplitSalaryByPayments() - s.RestIRPPerMonth(),
-		IRPFApplied:         irpf,
+		GrossSalaryPerYear:           grossSalary,
+		GrossSalaryPerMonth:          grossPerMonth,
+		NetSalaryPerYear:             s.YearlyGrossSalary - s.RestIRPPerYear(),
+		NetSalaryPerMonth:            s.SplitSalaryByPayments() - s.RestIRPPerMonth(),
+		IRPFApplied:                  irpf,
+		IRPFRetentionAppliedPerMonth: s.RestIRPPerMonth(),
+		IRPFRetentionAppliedPerYear:  s.RestIRPPerYear(),
 	}
 
 	log.Println("netSalary:", n)
@@ -113,7 +112,7 @@ func (s *Salary) CalculateNetSalary() []byte {
 
 // RestCotizationBase rest the Seguridad Social percentage
 func (s *Salary) RestCotizationBase() float64 {
-	toFloat := float64(s.SplitSalaryByPayments())
+	salaryToFloat := float64(s.YearlyGrossSalary)
 	var retention float64
 
 	switch base := s.ContractType; {
@@ -123,10 +122,10 @@ func (s *Salary) RestCotizationBase() float64 {
 		retention = 6.35
 	default:
 		retention = 6.4
-		log.Println("ContrackType is not A or B... set default value")
+		log.Println("Conntract Type is not A or B... set default value")
 	}
 
-	return toFloat / 100.00 * retention
+	return salaryToFloat / 100.00 * retention
 }
 
 // RestIRPPerMonth rest the irpf percentage from the gross salary
@@ -150,9 +149,9 @@ func (s *Salary) CalculateIRPF() int {
 	switch gros := s.YearlyGrossSalary; {
 	case gros < 12450:
 		return 19
-	case gros >= 12450 && gros < 22000:
+	case gros >= 12450 && gros < 20200:
 		return 24
-	case gros >= 22000 && gros <= 35200:
+	case gros >= 20200 && gros <= 35200:
 		return 30
 	case gros >= 35200 && gros <= 60000:
 		return 37
