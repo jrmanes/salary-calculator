@@ -77,15 +77,17 @@ func (s *Salary) CalculateNetSalary() []byte {
 	log.Println("salary gross per year", grossSalary)
 
 	irpf := s.CalculateIRPF()
-	log.Println("IRPF:", irpf)
+	//log.Println("IRPF:", irpf)
 
 	grossPerMonth := s.SplitSalaryByPayments()
 
-	log.Println("salary gross per month:", grossPerMonth)
-	log.Println("Discount after apply IRPF per YEAR:", s.RestIRPPerYear())
-	log.Println("Discount after apply IRPF per MONTH:", s.RestIRPPerMonth())
-	log.Println("Discount Base cotizacion SS:", s.RestCotizationBase())
-	log.Println("salary after ranges discounts", s.RestRangesOfIRPF())
+	//log.Println("salary gross per month:", grossPerMonth)
+	//log.Println("Discount after apply IRPF per YEAR:", s.RestIRPPerYear())
+	//log.Println("Discount after apply IRPF per MONTH:", s.RestIRPPerMonth())
+	//log.Println("Discount Base cotizacion SS:", s.RestCotizationBase())
+	//log.Println("salary after ranges discounts", s.RestRangesOfIRPF())
+
+	s.RestRangesOfIRPF()
 
 	// create a new NetSalary struct
 	n := NetSalary{
@@ -149,34 +151,129 @@ func (s *Salary) RestRangesOfIRPF() float64 {
 
 	salaryTotal := float64(s.YearlyGrossSalary)
 	salary := s.ToFloat()
-	log.Println("##############################")
+	var toDiscount float64
+	var currentRange float64
+	var tmpDisc float64
+
+	log.Println(".................................")
 
 	if salaryTotal < 12450.0 || salaryTotal > 12450.0 {
-		salary = salaryTotal - (12450.0 * 0.19)
-		log.Println("salary first range: ", salary)
+		//salary = salaryTotal - (12450.0 * 0.19)
+		currentRange = 12450.0
+		if s.ToFloat() < 12450.0 {
+			currentRange = 12459.0
+		}
+		log.Println("tmpdiscrange", currentRange)
+		currentRange = currentRange * 0.19
+		log.Println("currentRange with discount", currentRange)
+		toDiscount += currentRange
+		log.Println("toDiscount", toDiscount)
+
+		log.Println("tmpDisc before:", tmpDisc)
+		tmpDisc += toDiscount
+		log.Println("tmpDisc after:", tmpDisc)
+
+		log.Println("tmpDisc:", tmpDisc)
+		log.Println("toDiscount:", toDiscount)
+		log.Println(".................................")
 	}
 	if salaryTotal >= 12450.0 {
-		salary = salaryTotal - ((20200.0 - 12450.0) * 0.24)
-		log.Println("salary second range after discounts: ", salary)
+		//salary = salaryTotal - ((20200.0 - 12450.0) * 0.24)
+		//toDiscount += (20200.0 - 12450.0) * 0.24
+		currentRange = 20200.0 - 12450.0
+		if s.ToFloat() < 20200.0 {
+			currentRange = s.ToFloat() - 12450.0
+		}
+		log.Println("currentRange", currentRange)
+		currentRange = currentRange * 0.24
+		log.Println("currentRange with discount", currentRange)
+		toDiscount += currentRange
+		log.Println("toDiscount", toDiscount)
+
+		log.Println("tmpDisc before:", tmpDisc)
+		tmpDisc += toDiscount
+		log.Println("tmpDisc after:", tmpDisc)
+
+		log.Println("tmpDisc:", tmpDisc)
+		log.Println("toDiscount:", toDiscount)
+		log.Println(".................................")
 	}
 	if salaryTotal >= 20200.0 {
-		salary = salaryTotal - ((35200.0 - 20200.0) * 0.30)
-		log.Println("salary third after discounts: ", salary)
+		//salary = salaryTotal - ((35200.0 - 20200.0) * 0.30)
+		//toDiscount +=  (35200.0 - 20200.0) * 0.30
+		currentRange = 35200.0 - 20200.0
+		if s.ToFloat() < 35200.0 {
+			currentRange = s.ToFloat() - 20200.0
+		}
+		log.Println("tmpdiscrange", currentRange)
+		currentRange = currentRange * 0.30
+		log.Println("currentRange with discount", currentRange)
+		toDiscount += currentRange
+		log.Println("toDiscount", toDiscount)
+
+		log.Println("tmpDisc before:", tmpDisc)
+		tmpDisc += toDiscount
+		log.Println("tmpDisc after:", tmpDisc)
+
+		log.Println("tmpDisc:", tmpDisc)
+		log.Println("toDiscount:", toDiscount)
+		log.Println(".................................")
 	}
 	if salaryTotal >= 35200.0 {
-		salary = salaryTotal - ((60000.0 - 35200.0) * 0.37)
-		log.Println("salary fourth range: ", salary)
+		//salary = salaryTotal - ((60000.0 - 35200.0) * 0.37)
+		//toDiscount += (60000.0 - 35200.0) * 0.37
+		currentRange = 60000.0 - 35200.0
+		if s.ToFloat() < 60000.0 {
+			currentRange = s.ToFloat() - 35200.0
+		}
+		log.Println("tmpdiscrange", currentRange)
+		currentRange = currentRange * 0.37
+		log.Println("currentRange with discount", currentRange)
+		toDiscount += currentRange
+		log.Println("toDiscount", toDiscount)
+
+		log.Println("tmpDisc before:", tmpDisc)
+		tmpDisc += toDiscount
+		log.Println("tmpDisc after:", tmpDisc)
+
+		log.Println("tmpDisc:", tmpDisc)
+		log.Println("toDiscount:", toDiscount)
+		log.Println(".................................")
 	}
 	if salaryTotal >= 60000.0 {
 		salary = salaryTotal - ((300000.0 - 60000.0) * 0.45)
-		log.Println("salary fifth range: ", salary)
+		toDiscount += float64(s.YearlyGrossSalary) - salary
+		log.Println("tmpDisc before:", tmpDisc)
+		tmpDisc += toDiscount
+		log.Println("tmpDisc after:", tmpDisc)
+
+		log.Println("tmpDisc:", tmpDisc)
+		log.Println("toDiscount:", toDiscount)
+		log.Println(".................................")
 	}
 	if salaryTotal > 300000.0 {
 		salary = salaryTotal - (300000.0 * 0.47)
-		log.Println("salary last range: ", salary)
+		toDiscount += float64(s.YearlyGrossSalary) - salary
+		log.Println("tmpDisc before:", tmpDisc)
+		tmpDisc += toDiscount
+		log.Println("tmpDisc after:", tmpDisc)
+
+		log.Println("tmpDisc:", tmpDisc)
+		log.Println("toDiscount:", toDiscount)
+		log.Println(".................................")
 	}
 
-	log.Println("SALARY salaryTotal", salaryTotal)
+	log.Println("salary total: ", float64(s.YearlyGrossSalary), " - ", toDiscount, " --> ", (salary - toDiscount),
+		" per month", ((salary - toDiscount) / 12))
+	log.Println(".................................")
+
+	salary = s.ToFloat() - toDiscount
+
+	log.Println("tmpDisc", tmpDisc)
+	log.Println("toDiscount", toDiscount)
+	log.Println("SALARY:", salary)
+	log.Println("SALARY with discount", s.ToFloat()-toDiscount)
+	log.Println("salary - discount per MONTH:", s.YearlyGrossSalary, "-", "tmpDisc", tmpDisc, "=", ((s.ToFloat() - tmpDisc) / 12))
 	log.Println("SALARY AFTER DISCOUNTS", salary)
 	log.Println("##############################")
 
