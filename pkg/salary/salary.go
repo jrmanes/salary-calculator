@@ -79,16 +79,12 @@ func (s *Salary) CalculateNetSalary() []byte {
 	log.Println("IRPF:", irpf)
 
 	grossPerMonth := s.SplitSalaryByPayments()
+
 	log.Println("salary gross per month:", grossPerMonth)
-
-	s.RestIRPPerYear()
 	log.Println("Discount after apply IRPF per YEAR:", s.RestIRPPerYear())
-
-	s.RestIRPPerMonth()
 	log.Println("Discount after apply IRPF per MONTH:", s.RestIRPPerMonth())
-
-	s.RestCotizationBase()
 	log.Println("Discount Base cotizacion SS:", s.RestCotizationBase())
+	log.Println("salary after ranges discounts", s.RestRangesOfIRPF())
 
 	// create a new NetSalary struct
 	n := NetSalary{
@@ -146,25 +142,70 @@ func (s *Salary) SplitSalaryByPayments() int {
 	return s.YearlyGrossSalary / s.PaymentsPerYear
 }
 
+// RestRangesOfIRPF rest the ranges of IRPF
+func (s *Salary) RestRangesOfIRPF() float64 {
+	// TODO: calculate the discounts per each range and apply it to the gross salary
+
+	salaryTotal := float64(s.YearlyGrossSalary)
+	salary := s.ToFloat()
+	log.Println("##############################")
+
+	if salaryTotal < 12450.0 || salaryTotal > 12450.0 {
+		salary = salaryTotal - (12450.0 * 0.19)
+		log.Println("salary first range: ", salary)
+	}
+	if salaryTotal >= 12450.0 {
+		salary = salaryTotal - ((20200.0 - 12450.0) * 0.24)
+		log.Println("salary second range after discounts: ", salary)
+	}
+	if salaryTotal >= 20200.0 {
+		salary = salaryTotal - ((35200.0 - 20200.0) * 0.30)
+		log.Println("salary third after discounts: ", salary)
+	}
+	if salaryTotal >= 35200.0 {
+		salary = salaryTotal - ((60000.0 - 35200.0) * 0.37)
+		log.Println("salary fourth range: ", salary)
+	}
+	if salaryTotal >= 60000.0 {
+		salary = salaryTotal - ((300000.0 - 60000.0) * 0.45)
+		log.Println("salary fifth range: ", salary)
+	}
+	if salaryTotal > 300000.0 {
+		salary = salaryTotal - (300000.0 * 0.47)
+		log.Println("salary last range: ", salary)
+	}
+
+	log.Println("SALARY salaryTotal", salaryTotal)
+	log.Println("SALARY AFTER DISCOUNTS", salary)
+	log.Println("##############################")
+
+	return salary
+}
+
 // CalculateIRPF check the percentage of irpf need depending on your salary range
 func (s *Salary) CalculateIRPF() int {
 
-	switch gros := s.YearlyGrossSalary; {
-	case gros < 12450:
+	switch gross := s.YearlyGrossSalary; {
+	case gross < 12450:
 		return 19
-	case gros >= 12450 && gros < 20200:
+	case gross >= 12450 && gross < 20200:
 		return 24
-	case gros >= 20200 && gros <= 35200:
+	case gross >= 20200 && gross <= 35200:
 		return 30
-	case gros >= 35200 && gros <= 60000:
+	case gross >= 35200 && gross <= 60000:
 		return 37
-	case gros >= 60000 && gros <= 300000:
+	case gross >= 60000 && gross <= 300000:
 		return 45
-	case gros > 300000:
+	case gross > 300000:
 		return 47
 	default:
 		return 19
 	}
 
 	return 19
+}
+
+// ToFloat returns the salary casted to float64
+func (s *Salary) ToFloat() float64 {
+	return float64(s.YearlyGrossSalary)
 }
