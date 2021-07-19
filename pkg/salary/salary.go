@@ -23,6 +23,9 @@ type NetSalary struct {
 	IRPFRetentionAppliedPerYear int `json:"irpf_retention_applied_per_year"`
 	// IRPFRetentionApplied percentage of IRPF retention per year
 	IRPFRetentionAppliedPerMonth int `json:"irpf_retention_applied_per_month"`
+
+	// RetentionSS quantity in euros to discount depending on the contract type
+	RetentionSS float64 `json:"retention_ss"`
 }
 
 type Salary struct {
@@ -67,7 +70,6 @@ func (s *Salary) CalculateSalaryHandler(w http.ResponseWriter, r *http.Request) 
 
 // CalculateNetSalary is where we calculate the salary net using other methods
 func (s *Salary) CalculateNetSalary() []byte {
-
 	log.Println("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -")
 
 	grossSalary := s.YearlyGrossSalary
@@ -97,6 +99,7 @@ func (s *Salary) CalculateNetSalary() []byte {
 		IRPFApplied:                  irpf,
 		IRPFRetentionAppliedPerMonth: s.RestIRPPerMonth(),
 		IRPFRetentionAppliedPerYear:  s.RestIRPPerYear(),
+		RetentionSS:                  s.RestCotizationBase(),
 	}
 
 	log.Println("netSalary:", n)
