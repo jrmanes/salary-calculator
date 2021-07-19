@@ -13,7 +13,7 @@ func createRouter() http.Handler {
 
 	var s = salary.Salary{}
 
-	r.Post("/", s.CreateHandler)
+	r.Post("/", s.CalculateSalaryHandler)
 
 	return r
 }

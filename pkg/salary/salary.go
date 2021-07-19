@@ -28,10 +28,8 @@ type Salary struct {
 	ChildrenYoungerThan3  int    `json:"children_younger_than_3"`
 }
 
-// CreateHandler will add a user into the database
-func (s *Salary) CreateHandler(w http.ResponseWriter, r *http.Request) {
-	var netSalary NetSalary
-
+// CalculateSalaryHandler will add a user into the database
+func (s *Salary) CalculateSalaryHandler(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&s)
 	if err != nil {
 		log.Println("err", err)
@@ -50,7 +48,14 @@ func (s *Salary) CreateHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	//w.Write(j)
+
+	n := s.CalculateNetSalary()
+
+	w.Write(n)
+}
+
+// CalculateNetSalary is where we calculate the salary net using other methods
+func (s *Salary) CalculateNetSalary() []byte {
 
 	log.Println("*********************************")
 
@@ -72,40 +77,47 @@ func (s *Salary) CreateHandler(w http.ResponseWriter, r *http.Request) {
 	s.RestSS()
 	log.Println("Discount SS:", s.RestSS())
 
-	netSalary.GrossSalaryPerYear = grossSalary
-	netSalary.GrossSalaryPerMonth = grossPerMonth
-	netSalary.NetSalaryPerMonth = s.SplitSalaryByPayments() - s.RestIRPPerMonth()
-	netSalary.NetSalaryPerYear = s.YearlyGrossSalary - s.RestIRPPerYear()
-	netSalary.IRPFApplied = irpf
+	// create a new NetSalary struct
+	n := NetSalary{
+		GrossSalaryPerYear:  grossSalary,
+		GrossSalaryPerMonth: grossPerMonth,
+		NetSalaryPerYear:    s.SplitSalaryByPayments() - s.RestIRPPerMonth(),
+		NetSalaryPerMonth:   s.YearlyGrossSalary - s.RestIRPPerYear(),
+		IRPFApplied:         irpf,
+	}
 
-	log.Println("netSalary:", netSalary)
+	log.Println("netSalary:", n)
 	log.Println("*********************************")
 
-	n, err := json.Marshal(netSalary)
+	netS, err := json.Marshal(n)
 	if err != nil {
 		log.Println("err", err)
 	}
 
-	w.Write(n)
-
+	return netS
 }
 
+// RestSS rest the Seguridad Social percentage
 func (s *Salary) RestSS() int {
 	return s.SplitSalaryByPayments() / 100 * 6
 }
 
+// RestIRPPerMonth rest the irpf percentage from the gross salary
 func (s *Salary) RestIRPPerMonth() int {
 	return s.SplitSalaryByPayments() / 100 * s.CalculateIRPF()
 }
 
+// RestIRPPerYear rest the irpf from the gross year salary
 func (s *Salary) RestIRPPerYear() int {
 	return s.YearlyGrossSalary / 100 * s.CalculateIRPF()
 }
 
+// SplitSalaryByPayments returns the salary per number of payments
 func (s *Salary) SplitSalaryByPayments() int {
 	return s.YearlyGrossSalary / s.PaymentsPerYear
 }
 
+// CalculateIRPF check the percentage of irpf need depending on your salary range
 func (s *Salary) CalculateIRPF() int {
 
 	switch gros := s.YearlyGrossSalary; {
