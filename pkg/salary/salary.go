@@ -30,7 +30,7 @@ type Salary struct {
 	Age string `json:"age"`
 	// ProfessionalCategory category in which the user is, can be found in the contract
 	ProfessionalCategory string `json:"professional_category"`
-	// ContractType Type of the contract
+	// ContractType Type of the contract, A=Indefinido, B=Temporal
 	ContractType string `json:"contract_type"`
 	// FamilySituation
 	FamilySituation string `json:"family_situation"`
@@ -88,15 +88,15 @@ func (s *Salary) CalculateNetSalary() []byte {
 	s.RestIRPPerMonth()
 	log.Println("Discount after apply IRPF per MONTH:", s.RestIRPPerMonth())
 
-	s.RestSS()
-	log.Println("Discount SS:", s.RestSS())
+	s.RestCotizationBase()
+	log.Println("Discount Base cotizacion SS:", s.RestCotizationBase())
 
 	// create a new NetSalary struct
 	n := NetSalary{
 		GrossSalaryPerYear:  grossSalary,
 		GrossSalaryPerMonth: grossPerMonth,
-		NetSalaryPerYear:    s.SplitSalaryByPayments() - s.RestIRPPerMonth(),
-		NetSalaryPerMonth:   s.YearlyGrossSalary - s.RestIRPPerYear(),
+		NetSalaryPerYear:    s.YearlyGrossSalary - s.RestIRPPerYear(),
+		NetSalaryPerMonth:   s.SplitSalaryByPayments() - s.RestIRPPerMonth(),
 		IRPFApplied:         irpf,
 	}
 
@@ -111,9 +111,22 @@ func (s *Salary) CalculateNetSalary() []byte {
 	return netS
 }
 
-// RestSS rest the Seguridad Social percentage
-func (s *Salary) RestSS() int {
-	return s.SplitSalaryByPayments() / 100 * 6
+// RestCotizationBase rest the Seguridad Social percentage
+func (s *Salary) RestCotizationBase() float64 {
+	toFloat := float64(s.SplitSalaryByPayments())
+	var retention float64
+
+	switch base := s.ContractType; {
+	case base == "A":
+		retention = 6.4
+	case base == "B":
+		retention = 6.35
+	default:
+		retention = 6.4
+		log.Println("ContrackType is not A or B... set default value")
+	}
+
+	return toFloat / 100.00 * retention
 }
 
 // RestIRPPerMonth rest the irpf percentage from the gross salary
