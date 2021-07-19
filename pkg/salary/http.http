@@ -2,7 +2,7 @@ POST http://localhost:8080/api/v1/salary
 Content-Type: application/json
 
 {
-  "yearly_gross_salary": 45000,
+  "yearly_gross_salary": 50000,
   "payments_per_year": 12,
   "age": "28",
   "professional_category": "A",
