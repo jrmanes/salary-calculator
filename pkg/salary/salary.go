@@ -113,19 +113,33 @@ func (s *Salary) CalculateNetSalary() []byte {
 }
 
 // RestCotizationBase rest the Seguridad Social percentage
+// if the contract is "indefinido/fijo" it has 6.35, otherwise 6.35
 func (s *Salary) RestCotizationBase() float64 {
-	salaryToFloat := float64(s.YearlyGrossSalary)
+	//salaryToFloat := float64(s.YearlyGrossSalary)
+	salaryToFloat := float64(s.MonthlyGrossSalary())
+
 	var retention float64
 
+	log.Println("s.ContractType", s.ContractType)
 	switch base := s.ContractType; {
 	case base == "A":
-		retention = 6.4
-	case base == "B":
+		// contract "fijo"
 		retention = 6.35
+	case base == "B":
+		// contract "temporal"
+		retention = 6.4
 	default:
 		retention = 6.4
-		log.Println("Conntract Type is not A or B... set default value")
+		log.Println("Contract Type is not A or B... set default value")
 	}
+
+	log.Println("////////////////////////////")
+	log.Println("salaryToFloat", salaryToFloat)
+	log.Println("retention", retention)
+	log.Println("salaryToFloat", salaryToFloat)
+	log.Println("Retention SS", "retention * salaryToFloat / 100.00")
+	log.Println("Retention SS", retention*salaryToFloat/100.00)
+	log.Println("////////////////////////////")
 
 	return salaryToFloat / 100.00 * retention
 }
@@ -155,7 +169,7 @@ func (s *Salary) RestRangesOfIRPF() float64 {
 	var currentRange float64
 	var tmpDisc float64
 
-	log.Println(".................................")
+	log.Println("\n.................................")
 
 	if salaryTotal < 12450.0 || salaryTotal > 12450.0 {
 		log.Println("< 12450.0 || salaryTotal > 12450.0")
@@ -319,6 +333,11 @@ func (s *Salary) CalculateIRPF() int {
 	}
 
 	return 19
+}
+
+// ToFloat returns the salary casted to float64
+func (s *Salary) MonthlyGrossSalary() int {
+	return s.YearlyGrossSalary / s.PaymentsPerYear
 }
 
 // ToFloat returns the salary casted to float64
