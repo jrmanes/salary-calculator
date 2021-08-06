@@ -8,21 +8,21 @@ import (
 
 type NetSalary struct {
 	// GrossSalaryPerYear salary gross per year
-	GrossSalaryPerYear int `json:"gross_salary_per_year"`
+	GrossSalaryPerYear float64 `json:"gross_salary_per_year"`
 	// GrossSalaryPerMonth salary gross per month
-	GrossSalaryPerMonth int `json:"gross_salary_per_month"`
+	GrossSalaryPerMonth float64 `json:"gross_salary_per_month"`
 
 	// NetSalaryPerYear net salary, calculated by year
-	NetSalaryPerYear int `json:"net_salary_per_year"`
+	NetSalaryPerYear float64 `json:"net_salary_per_year"`
 	// NetSalaryPerMonth net salary, calculated by month
-	NetSalaryPerMonth int `json:"net_salary_per_month"`
+	NetSalaryPerMonth float64 `json:"net_salary_per_month"`
 
 	// IRPFApplied percentage of IRPF to apply
-	IRPFApplied int `json:"irpf_applied"`
+	IRPFApplied float64 `json:"irpf_applied"`
 	// IRPFRetentionApplied percentage of IRPF retention per year
-	IRPFRetentionAppliedPerYear int `json:"irpf_retention_applied_per_year"`
+	IRPFRetentionAppliedPerYear float64 `json:"irpf_retention_applied_per_year"`
 	// IRPFRetentionApplied percentage of IRPF retention per year
-	IRPFRetentionAppliedPerMonth int `json:"irpf_retention_applied_per_month"`
+	IRPFRetentionAppliedPerMonth float64 `json:"irpf_retention_applied_per_month"`
 
 	// RetentionSS quantity in euros to discount depending on the contract type
 	RetentionSS float64 `json:"retention_ss"`
@@ -30,9 +30,9 @@ type NetSalary struct {
 
 type Salary struct {
 	// YearlyGrossSalary total salary gross per year
-	YearlyGrossSalary int `json:"yearly_gross_salary"`
+	YearlyGrossSalary float64 `json:"yearly_gross_salary"`
 	// PaymentsPerYear number of payments received per year
-	PaymentsPerYear int `json:"payments_per_year"`
+	PaymentsPerYear float64 `json:"payments_per_year"`
 	// Age years of the user
 	Age string `json:"age"`
 	// ProfessionalCategory category in which the user is, can be found in the contract
@@ -75,17 +75,9 @@ func (s *Salary) CalculateNetSalary() []byte {
 
 	grossSalary := s.YearlyGrossSalary
 	log.Println("salary gross per year", grossSalary)
-
 	irpf := s.CalculateIRPF()
-	//log.Println("IRPF:", irpf)
 
 	grossPerMonth := s.SplitSalaryByPayments()
-
-	//log.Println("salary gross per month:", grossPerMonth)
-	//log.Println("Discount after apply IRPF per YEAR:", s.RestIRPPerYear())
-	//log.Println("Discount after apply IRPF per MONTH:", s.RestIRPPerMonth())
-	//log.Println("Discount Base cotizacion SS:", s.RestCotizationBase())
-	//log.Println("salary after ranges discounts", s.RestRangesOfIRPF())
 
 	s.RestRangesOfIRPF()
 
@@ -94,13 +86,14 @@ func (s *Salary) CalculateNetSalary() []byte {
 		GrossSalaryPerYear:           grossSalary,
 		GrossSalaryPerMonth:          grossPerMonth,
 		NetSalaryPerYear:             s.YearlyGrossSalary - s.RestIRPPerYear(),
-		NetSalaryPerMonth:            s.SplitSalaryByPayments() - s.RestIRPPerMonth(),
+		NetSalaryPerMonth:            s.SplitSalaryByPayments() - s.RestIRPPerMonth() - s.RestCotizationBase(),
 		IRPFApplied:                  irpf,
 		IRPFRetentionAppliedPerMonth: s.RestIRPPerMonth(),
 		IRPFRetentionAppliedPerYear:  s.RestIRPPerYear(),
 		RetentionSS:                  s.RestCotizationBase(),
 	}
 
+	log.Println("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -")
 	log.Println("netSalary:", n)
 	log.Println("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -")
 
@@ -115,12 +108,9 @@ func (s *Salary) CalculateNetSalary() []byte {
 // RestCotizationBase rest the Seguridad Social percentage
 // if the contract is "indefinido/fijo" it has 6.35, otherwise 6.35
 func (s *Salary) RestCotizationBase() float64 {
-	//salaryToFloat := float64(s.YearlyGrossSalary)
-	salaryToFloat := float64(s.MonthlyGrossSalary())
-
+	salaryToFloat := s.MonthlyGrossSalary()
 	var retention float64
 
-	log.Println("s.ContractType", s.ContractType)
 	switch base := s.ContractType; {
 	case base == "A":
 		// contract "fijo"
@@ -133,41 +123,35 @@ func (s *Salary) RestCotizationBase() float64 {
 		log.Println("Contract Type is not A or B... set default value")
 	}
 
-	log.Println("////////////////////////////")
-	log.Println("salaryToFloat", salaryToFloat)
-	log.Println("retention", retention)
-	log.Println("salaryToFloat", salaryToFloat)
-	log.Println("Retention SS", "retention * salaryToFloat / 100.00")
-	log.Println("Retention SS", retention*salaryToFloat/100.00)
-	log.Println("////////////////////////////")
-
+	// return the retention apply
 	return salaryToFloat / 100.00 * retention
 }
 
 // RestIRPPerMonth rest the irpf percentage from the gross salary
-func (s *Salary) RestIRPPerMonth() int {
+func (s *Salary) RestIRPPerMonth() float64 {
 	return s.SplitSalaryByPayments() / 100 * s.CalculateIRPF()
 }
 
 // RestIRPPerYear rest the irpf from the gross year salary
-func (s *Salary) RestIRPPerYear() int {
+func (s *Salary) RestIRPPerYear() float64 {
 	return s.YearlyGrossSalary / 100 * s.CalculateIRPF()
 }
 
 // SplitSalaryByPayments returns the salary per number of payments
-func (s *Salary) SplitSalaryByPayments() int {
+func (s *Salary) SplitSalaryByPayments() float64 {
 	return s.YearlyGrossSalary / s.PaymentsPerYear
 }
 
 // RestRangesOfIRPF rest the ranges of IRPF
 func (s *Salary) RestRangesOfIRPF() float64 {
-	// TODO: calculate the discounts per each range and apply it to the gross salary
-
-	salaryTotal := float64(s.YearlyGrossSalary)
+	salaryTotal := s.YearlyGrossSalary
 	salary := s.ToFloat()
-	var toDiscount float64
-	var currentRange float64
-	var tmpDisc float64
+
+	var (
+		toDiscount   float64
+		currentRange float64
+		tmpDisc      float64
+	)
 
 	log.Println("\n.................................")
 
@@ -183,16 +167,9 @@ func (s *Salary) RestRangesOfIRPF() float64 {
 		log.Println("currentRange with discount", currentRange)
 		log.Println("toDiscount before:", toDiscount)
 		toDiscount += currentRange
+
 		log.Println("toDiscountafter:", toDiscount)
-
 		log.Println("toDiscount", toDiscount)
-
-		//log.Println("tmpDisc before:", tmpDisc)
-		//tmpDisc += toDiscount
-		//log.Println("tmpDisc after:", tmpDisc)
-		//
-		//log.Println("tmpDisc:", tmpDisc)
-		log.Println("toDiscount:", toDiscount)
 		log.Println(".................................")
 	}
 	if salaryTotal >= 12450.0 {
@@ -208,15 +185,8 @@ func (s *Salary) RestRangesOfIRPF() float64 {
 		log.Println("currentRange with discount", currentRange)
 		log.Println("toDiscount before:", toDiscount)
 		toDiscount += currentRange
+
 		log.Println("toDiscountafter:", toDiscount)
-
-		log.Println("toDiscount", toDiscount)
-
-		//log.Println("tmpDisc before:", tmpDisc)
-		//tmpDisc += toDiscount
-		//log.Println("tmpDisc after:", tmpDisc)
-		//
-		//log.Println("tmpDisc:", tmpDisc)
 		log.Println("toDiscount:", toDiscount)
 		log.Println(".................................")
 	}
@@ -233,15 +203,8 @@ func (s *Salary) RestRangesOfIRPF() float64 {
 		log.Println("currentRange with discount", currentRange)
 		log.Println("toDiscount before:", toDiscount)
 		toDiscount += currentRange
+
 		log.Println("toDiscountafter:", toDiscount)
-
-		log.Println("toDiscount", toDiscount)
-
-		//log.Println("tmpDisc before:", tmpDisc)
-		//tmpDisc += toDiscount
-		//log.Println("tmpDisc after:", tmpDisc)
-		//
-		//log.Println("tmpDisc:", tmpDisc)
 		log.Println("toDiscount:", toDiscount)
 		log.Println(".................................")
 	}
@@ -258,15 +221,8 @@ func (s *Salary) RestRangesOfIRPF() float64 {
 		log.Println("currentRange with discount", currentRange)
 		log.Println("toDiscount before:", toDiscount)
 		toDiscount += currentRange
+
 		log.Println("toDiscountafter:", toDiscount)
-
-		log.Println("toDiscount", toDiscount)
-
-		//log.Println("tmpDisc before:", tmpDisc)
-		//tmpDisc += toDiscount
-		//log.Println("tmpDisc after:", tmpDisc)
-		//
-		//log.Println("tmpDisc:", tmpDisc)
 		log.Println("toDiscount:", toDiscount)
 		log.Println(".................................")
 	}
@@ -313,7 +269,7 @@ func (s *Salary) RestRangesOfIRPF() float64 {
 }
 
 // CalculateIRPF check the percentage of irpf need depending on your salary range
-func (s *Salary) CalculateIRPF() int {
+func (s *Salary) CalculateIRPF() float64 {
 
 	switch gross := s.YearlyGrossSalary; {
 	case gross < 12450:
@@ -335,8 +291,8 @@ func (s *Salary) CalculateIRPF() int {
 	return 19
 }
 
-// ToFloat returns the salary casted to float64
-func (s *Salary) MonthlyGrossSalary() int {
+// MonthlyGrossSalary returns the salary casted to float64
+func (s *Salary) MonthlyGrossSalary() float64 {
 	return s.YearlyGrossSalary / s.PaymentsPerYear
 }
 
