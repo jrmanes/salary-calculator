@@ -1,3 +1,5 @@
+[![Go Report Card](https://goreportcard.com/badge/github.com/jrmanes/salary-calculator)](https://goreportcard.com/report/github.com/jrmanes/salary-calculator)
+
 # Salary Calculator
 
 Is an API which calculates the net salary in Spain.
